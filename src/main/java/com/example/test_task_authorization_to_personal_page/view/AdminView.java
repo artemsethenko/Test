@@ -7,6 +7,7 @@ import com.example.test_task_authorization_to_personal_page.entity.UserEntity;
 import com.example.test_task_authorization_to_personal_page.repositories.PersonRepository;
 import com.example.test_task_authorization_to_personal_page.repositories.UserRepository;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.details.Details;
@@ -22,7 +23,7 @@ import com.vaadin.flow.router.Route;
 
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import jakarta.annotation.security.RolesAllowed;
-import lombok.Data;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,7 +32,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @Route(value = "admin", layout = MainLayout.class)//адрес страницы и связь с MainLayout
 @RolesAllowed("ADMIN")// Уровень доступа
 @Uses(Icon.class)//иконка рядом с названием
-@Data
+@Getter
 public class AdminView extends VerticalLayout {
     private  final PasswordEncoder passwordEncoder;
     private final PersonRepository personRepository;
@@ -41,13 +42,13 @@ public class AdminView extends VerticalLayout {
 
     private final UserEditor userEditor;
 
-    private Grid<UserEntity> employeeGrid= new Grid<>(UserEntity.class);
+    private final Grid<UserEntity> employeeGrid= new Grid<>(UserEntity.class);
     private final TextField filter = new TextField();
     private final Button addNewPersonButton = new Button("Новый пользователь");
-    private Span name = new Span();
-    private Span email = new Span();
-    private Span phone = new Span();
-    private Span birthday = new Span();
+    private final Span name = new Span();
+    private final Span email = new Span();
+    private final Span phone = new Span();
+    private final Span birthday = new Span();
     UserEntity user;
     Person person;
 
@@ -71,7 +72,14 @@ public class AdminView extends VerticalLayout {
                     String username = userDetails.getUsername();
                     person = personRepository.findByLogin(username);
                 });
-        user = person.getUserEntity();
+        try {
+            user = person.getUserEntity();
+        }catch (Exception e){
+            e.printStackTrace();
+            UI.getCurrent().getPage().setLocation("/login");
+
+        }
+
 
 
         userEditor.setVisible(false);
@@ -100,11 +108,23 @@ public class AdminView extends VerticalLayout {
         //редоктирование  при выборе одного из списка
         employeeGrid
                 .asSingleSelect()
-                .addValueChangeListener(e -> userEditor.editUser(e.getValue()));
+                .addValueChangeListener(e -> {
+                    personEditor.setVisible(false);
+                    userEditor.editUser(e.getValue());
+                });
 
 
 //Кнопка создания нового пользователя
-        addNewPersonButton.addClickListener(e -> personEditor.editPerson(new Person()));
+        addNewPersonButton.addClickListener(e -> {
+            userEditor.setVisible(false);
+            if(personEditor.isVisible())
+            {
+                personEditor.getCancel().click();
+            }else
+            {
+                personEditor.editPerson(new Person());
+            }
+        });
 
 
 //Обновление полей после изменений в userEditor
@@ -114,10 +134,7 @@ public class AdminView extends VerticalLayout {
             UserEntity updatedUser = userEditor.getBinder().getBean();
             updateUserInfoAdmin(updatedUser);
         });
-        personEditor.setChangeHandler(()-> {
-            fillList(filter.getValue());
-        });
-
+        personEditor.setChangeHandler(() -> fillList(filter.getValue()));
         fillList("");
     }
     protected void updateUserInfoAdmin(UserEntity updatedUser){

@@ -77,8 +77,8 @@ public class MainLayout extends AppLayout {
 
     }
 
-    private SecurityService authenticatedUser;
-    private AccessAnnotationChecker accessChecker;
+    private final SecurityService authenticatedUser;
+    private final AccessAnnotationChecker accessChecker;
 
     public MainLayout(SecurityService authenticatedUser, AccessAnnotationChecker accessChecker) throws IOException {
         this.authenticatedUser = authenticatedUser;
@@ -102,12 +102,12 @@ public class MainLayout extends AppLayout {
         Optional<Person > maybeUser = authenticatedUser.get();
         if (maybeUser.isPresent()) {
             Person user = maybeUser.get();
+
+            //устанавливаем аватарку если есть
             Avatar avatar = new Avatar();
             if ( user.getUserEntity().getPhotoUrl()!=null) {
                 Path path = Paths.get("src/main/webapp/" + user.getUserEntity().getPhotoUrl());
                 byte[] imageBytes = Files.readAllBytes(path);
-
-
                 StreamResource resource = new StreamResource("profile-pic",
                         () -> new ByteArrayInputStream(imageBytes));
                 avatar.setImageResource(resource);

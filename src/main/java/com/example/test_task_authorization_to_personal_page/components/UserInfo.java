@@ -9,37 +9,32 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-import lombok.Data;
+import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @SpringComponent
 @UIScope
-@Data
+@Getter
 public class UserInfo extends HorizontalLayout implements KeyNotifier {
 
     private final  UserEntity user;
-    private final Button addNewButton = new Button("Редактировать");
-    private Paragraph lastName = new Paragraph();
-    private Paragraph firstName = new Paragraph();
-    private Paragraph middleName = new Paragraph();
-    private Paragraph birthday = new Paragraph();
-    private Paragraph email = new Paragraph();
-    private Paragraph phoneNumber = new Paragraph();
-    private UserEditor userEditor;
+    private final Button editButton = new Button("Редактировать");
+    private final Paragraph lastName = new Paragraph();
+    private final Paragraph firstName = new Paragraph();
+    private final Paragraph middleName = new Paragraph();
+    private final Paragraph birthday = new Paragraph();
+    private final Paragraph email = new Paragraph();
+    private final Paragraph phoneNumber = new Paragraph();
+    private final UserEditor userEditor;
     private final UserRepository userRepository;
 
-    @Setter
-    public ChangeHandler changeHandler;
-    public interface ChangeHandler{
-        void onChang();
-    }
+
 @Autowired
     public UserInfo(UserEntity userEntity, UserRepository userRepository) {
-        this.user = userEntity;
         this.userRepository = userRepository;
-
-        UserEditor userEditor = new UserEditor(userRepository);
+        userEditor = new UserEditor(userRepository);
+        user = userRepository.findById(userEntity.getId()).orElse(userEntity);
 
         lastName.setWidth("230px");
         lastName.setHeight("15px");
@@ -71,15 +66,17 @@ public class UserInfo extends HorizontalLayout implements KeyNotifier {
         phoneNumber.getStyle().set("font-size", "var(--lumo-font-size-m)");
 
     updateUserInfo(user);
+    add(new VerticalLayout(firstName,lastName,middleName,birthday,email,phoneNumber, editButton),userEditor);
 
 
-        add(new VerticalLayout(firstName,lastName,middleName,birthday,email,phoneNumber,addNewButton),userEditor);
-
-    addNewButton.addClickListener(e -> userEditor.editUser(user));
-    userEditor.editUser(null);
-
-
-    }
+    editButton.addClickListener(e -> {
+        if (userEditor.isVisible()){
+            userEditor.setVisible(false);
+        }else {
+        userEditor.editUser(user);
+        }
+    });
+}
     public void updateUserInfo(UserEntity updatedUser) {
         firstName.setText(  "Имя:            " + updatedUser.getFirstName());
         lastName.setText(   "Фамилия:        " + updatedUser.getLastName());
@@ -87,6 +84,12 @@ public class UserInfo extends HorizontalLayout implements KeyNotifier {
         birthday.setText(   "День рождения:  " + updatedUser.getBirthday().toString());
         email.setText(      "Email:          " + updatedUser.getEmail());
         phoneNumber.setText("Номер телефона: " + updatedUser.getPhoneNumber());
+    }
+
+    @Setter
+    public ChangeHandler changeHandler;
+    public interface ChangeHandler{
+        void onChang();
     }
 
 }

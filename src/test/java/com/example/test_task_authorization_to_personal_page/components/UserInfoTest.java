@@ -53,7 +53,7 @@ public class UserInfoTest {
     @Test
     public void addNewButton_shouldCallEditUserInUserEditor() {
         // Нажатие на кнопку "Редактировать"
-        userInfo.getAddNewButton().click();
+        userInfo.getEditButton().click();
 
    }
 }

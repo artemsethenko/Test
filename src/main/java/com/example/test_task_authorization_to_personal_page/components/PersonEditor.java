@@ -17,7 +17,7 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
-import lombok.Data;
+import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,7 +26,7 @@ import java.time.LocalDate;
 
 @SpringComponent
 @UIScope
-@Data
+@Getter
 public class PersonEditor  extends VerticalLayout implements KeyNotifier {
         private final PasswordEncoder passwordEncoder;
         private  final PersonRepository personRepository;
@@ -37,8 +37,7 @@ public class PersonEditor  extends VerticalLayout implements KeyNotifier {
         private final ComboBox<Role> roles = new ComboBox<>("Выберите роль");
         private final Button save = new Button("Save", VaadinIcon.CHECK.create());
         private final Button cancel = new Button("Cancel");
-        private final Button delete = new Button("Delete", VaadinIcon.TRASH.create());
-        private final HorizontalLayout actions = new HorizontalLayout(save, cancel, delete);
+        private final HorizontalLayout actions = new HorizontalLayout(save, cancel);
         private final Binder<Person> personBinder = new Binder<>(Person.class);
 
         @Setter
@@ -64,13 +63,12 @@ public class PersonEditor  extends VerticalLayout implements KeyNotifier {
             setSpacing(true);
 
             save.addThemeVariants(ButtonVariant.LUMO_PRIMARY);
-            delete.addThemeVariants(ButtonVariant.LUMO_ERROR);
+
 
             addKeyPressListener(Key.ENTER, e -> save());
 
             // wire action buttons to save, delete and reset
             save.addClickListener(e -> save());
-            delete.addClickListener(e -> delete());
             cancel.addClickListener(e -> editPerson(person));
             cancel.addClickListener(e -> setVisible(false));
             setVisible(false);
@@ -92,10 +90,7 @@ public class PersonEditor  extends VerticalLayout implements KeyNotifier {
             login.focus();
         }
 
-        private void delete() {
-            personRepository.delete(person);
-            changeHandler.onChang();
-        }
+
         private void save() {
             UserEntity user = new UserEntity("","","", LocalDate.of(2000,1,1),"","");
             person.setUserEntity(user);

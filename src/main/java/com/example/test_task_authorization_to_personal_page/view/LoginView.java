@@ -51,7 +51,7 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
         setOpened(true);
     }
 
-    //Если пользователь уже прошел проверку его перенаправляют "" а форма входа скрыта
+    //Если пользователь уже прошел проверку его перенаправляют "" , форма входа скрыта
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
         if (securityService.get().isPresent()) {

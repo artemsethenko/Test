@@ -6,6 +6,7 @@ import com.example.test_task_authorization_to_personal_page.entity.UserEntity;
 import com.example.test_task_authorization_to_personal_page.repositories.PersonRepository;
 import com.example.test_task_authorization_to_personal_page.repositories.UserRepository;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.Uses;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
@@ -26,6 +27,7 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 @PageTitle("UserPage")
 @Route(value = "user", layout = MainLayout.class)
@@ -36,23 +38,34 @@ import java.io.InputStream;
 
 public class UserView extends VerticalLayout {
     private final UserRepository userRepository;
-    private  UserInfo userInfo ;
+    private final UserInfo userInfo ;
+    private  UserEntity user;
 
     private final  MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
-    private VerticalLayout forImage = new VerticalLayout();
+    private final VerticalLayout forImage = new VerticalLayout();
 
     @Autowired
 
     public UserView(UserRepository userRepository, PersonRepository personRepository, AuthenticationContext authenticationContext) {
         this.userRepository = userRepository;
-        UserEditor userEditor =new UserEditor(userRepository);
+
         //Получаю доступ к текушего пользователя
-        UserDetails userDetails = authenticationContext.getAuthenticatedUser(UserDetails.class).get();
-        String username = userDetails.getUsername();
-        UserEntity user = personRepository.findByLogin(username).getUserEntity();
+
+
+        Optional<UserDetails> optionalUD = authenticationContext.getAuthenticatedUser(UserDetails.class);
+            try {
+                String username = optionalUD.get().getUsername();
+                user = personRepository.findByLogin(username).getUserEntity();
+            }catch (Exception e){
+                authenticationContext.logout();
+                UI.getCurrent().getPage().setLocation("/login");
+            }
+
+
 
         //Создаем поля с информацией о пользователе
         userInfo = new UserInfo(user, userRepository);
+        UserEditor userEditor = userInfo.getUserEditor();
 
         //Место под фото
 
@@ -69,16 +82,13 @@ public class UserView extends VerticalLayout {
 
       //  Добавляем все на страницу
         add(new HorizontalLayout(forImage,userInfo),upload);
-        userInfo.setChangeHandler(() ->{
-            UserEntity updatedUser = userEditor.getBinder().getBean();
-            userInfo.updateUserInfo(updatedUser);});
-        userEditor.setChangeHandler(() -> {
-            userEditor.setVisible(false);
-            // Получить обновленные данные пользователя из userEditor
-           // UserEntity updatedUser = userEditor.getBinder().getBean();  // Используем binder для получения обновленного объекта
 
-            // Обновить поля UserInfo с данными updatedUser
-           // userInfo.updateUserInfo(updatedUser);
+        userEditor.setChangeHandler(() -> {
+           //  Получить обновленные данные пользователя из userEditor
+            UserEntity updatedUser = userEditor.getBinder().getBean();  // Используем binder для получения обновленного объекта
+
+           //  Обновить поля UserInfo с данными updatedUser
+            userInfo.updateUserInfo(updatedUser);
 
         });
 
