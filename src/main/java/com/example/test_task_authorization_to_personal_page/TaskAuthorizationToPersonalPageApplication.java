@@ -4,10 +4,10 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 
-public class TestTaskAuthorizationToPersonalPageApplication   {
+public class TaskAuthorizationToPersonalPageApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(TestTaskAuthorizationToPersonalPageApplication.class, args);
+		SpringApplication.run(TaskAuthorizationToPersonalPageApplication.class, args);
 	}
 
 

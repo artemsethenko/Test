@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.example</groupId>
-	<artifactId>test_task_authorization_to_personal_page</artifactId>
+	<artifactId>task_authorization_to_personal_page</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>test_task_authorization_to_personal_page</name>
 	<description>Demo project for Spring Boot</description>

@@ -23,13 +23,9 @@ import java.time.LocalDate;
 public class LoginView extends LoginOverlay implements BeforeEnterObserver {
 
     private final SecurityService securityService;
-    private final PersonRepository personRepository;
-    private final PasswordEncoder passwordEncoder;
 
     public LoginView(SecurityService securityService, PersonRepository personRepository, PasswordEncoder passwordEncoder) {
         this.securityService = securityService;
-        this.personRepository = personRepository;
-        this.passwordEncoder = passwordEncoder;
 
         //Создание админа если его нет в базе данных
         if (personRepository.findAll().stream().noneMatch(e -> e.getRoles().equals(Role.ADMIN))){
@@ -43,6 +39,7 @@ public class LoginView extends LoginOverlay implements BeforeEnterObserver {
         i18n.getHeader().setTitle("TestVaadin");
         i18n.getHeader().setDescription("Login  admin/admin");
         i18n.setAdditionalInformation(null);
+        i18n.getForm().setSubmit("Вход");
 
         //задал новую логику ForgotPassword - переход на другую страницу
         addForgotPasswordListener(forgotPasswordEvent -> UI.getCurrent().getPage().setLocation("/registration"));

@@ -1,6 +1,7 @@
 package com.example.test_task_authorization_to_personal_page.components;
 
 import com.example.test_task_authorization_to_personal_page.entity.UserEntity;
+import com.example.test_task_authorization_to_personal_page.repositories.UserRepository;
 import com.vaadin.flow.component.KeyNotifier;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.Paragraph;
@@ -8,12 +9,13 @@ import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
+import lombok.Data;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @SpringComponent
 @UIScope
-
+@Data
 public class UserInfo extends HorizontalLayout implements KeyNotifier {
 
     private final  UserEntity user;
@@ -24,6 +26,8 @@ public class UserInfo extends HorizontalLayout implements KeyNotifier {
     private Paragraph birthday = new Paragraph();
     private Paragraph email = new Paragraph();
     private Paragraph phoneNumber = new Paragraph();
+    private UserEditor userEditor;
+    private final UserRepository userRepository;
 
     @Setter
     public ChangeHandler changeHandler;
@@ -31,9 +35,11 @@ public class UserInfo extends HorizontalLayout implements KeyNotifier {
         void onChang();
     }
 @Autowired
-    public UserInfo(UserEntity userEntity, UserEditor userEditor) {
+    public UserInfo(UserEntity userEntity, UserRepository userRepository) {
         this.user = userEntity;
+        this.userRepository = userRepository;
 
+        UserEditor userEditor = new UserEditor(userRepository);
 
         lastName.setWidth("230px");
         lastName.setHeight("15px");
@@ -75,12 +81,12 @@ public class UserInfo extends HorizontalLayout implements KeyNotifier {
 
     }
     public void updateUserInfo(UserEntity updatedUser) {
-        firstName.setText(    "Имя:            " + updatedUser.getLastName());
-        lastName.setText(   "Фамилия:        " + updatedUser.getFirstName());
-        middleName.setText(  "Отчество:       " + updatedUser.getMiddleName());
-        birthday.setText(    "День рождения:  " + updatedUser.getBirthday().toString());
-        email.setText(       "Email:          " + updatedUser.getEmail());
-        phoneNumber.setText( "Номер телефона: " + updatedUser.getPhoneNumber());
+        firstName.setText(  "Имя:            " + updatedUser.getFirstName());
+        lastName.setText(   "Фамилия:        " + updatedUser.getLastName());
+        middleName.setText( "Отчество:       " + updatedUser.getMiddleName());
+        birthday.setText(   "День рождения:  " + updatedUser.getBirthday().toString());
+        email.setText(      "Email:          " + updatedUser.getEmail());
+        phoneNumber.setText("Номер телефона: " + updatedUser.getPhoneNumber());
     }
 
 }

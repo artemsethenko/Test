@@ -22,16 +22,18 @@ import com.vaadin.flow.router.Route;
 
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import jakarta.annotation.security.RolesAllowed;
+import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @PageTitle("AdminPage")//Название страницы
 @Route(value = "admin", layout = MainLayout.class)//адрес страницы и связь с MainLayout
 @RolesAllowed("ADMIN")// Уровень доступа
 @Uses(Icon.class)//иконка рядом с названием
-
-
+@Data
 public class AdminView extends VerticalLayout {
+    private  final PasswordEncoder passwordEncoder;
     private final PersonRepository personRepository;
     private final AuthenticationContext authenticationContext;
     private final UserRepository userRepository;
@@ -46,19 +48,32 @@ public class AdminView extends VerticalLayout {
     private Span email = new Span();
     private Span phone = new Span();
     private Span birthday = new Span();
+    UserEntity user;
+    Person person;
 
 
 
     @Autowired
-    public AdminView(PersonRepository personRepository, AuthenticationContext authenticationContext, UserRepository userRepository, PersonEditor personEditor, UserEditor userEditor) {
+    public AdminView(PasswordEncoder passwordEncoder,
+                     PersonRepository personRepository,
+                     AuthenticationContext authenticationContext,
+                     UserRepository userRepository) {
+
+        this.passwordEncoder = passwordEncoder;
         this.personRepository = personRepository;
         this.authenticationContext = authenticationContext;
         this.userRepository = userRepository;
-        this.personEditor = personEditor;
-        this.userEditor = userEditor;
-        UserDetails userDetails = authenticationContext.getAuthenticatedUser(UserDetails.class).get();
-        String username = userDetails.getUsername();
-        UserEntity user = personRepository.findByLogin(username).getUserEntity();
+
+
+        userEditor = new UserEditor(userRepository);
+        personEditor = new PersonEditor(passwordEncoder,personRepository,userRepository);
+        authenticationContext.getAuthenticatedUser(UserDetails.class).ifPresent(userDetails -> {
+                    String username = userDetails.getUsername();
+                    person = personRepository.findByLogin(username);
+                });
+        user = person.getUserEntity();
+
+
         userEditor.setVisible(false);
 
         updateUserInfoAdmin(user);
@@ -76,7 +91,11 @@ public class AdminView extends VerticalLayout {
         filter.setValueChangeMode(ValueChangeMode.EAGER);
         filter.addValueChangeListener(field -> fillList(field.getValue()));
         HorizontalLayout toolbar = new HorizontalLayout(details,filter, addNewPersonButton);
-        add(toolbar,userEditor,personEditor, employeeGrid );
+       // add(toolbar,userEditor,personEditor, employeeGrid );
+        add(toolbar);
+        add(userEditor );
+        add(personEditor);
+        add( employeeGrid );
 
         //редоктирование  при выборе одного из списка
         employeeGrid
@@ -101,14 +120,14 @@ public class AdminView extends VerticalLayout {
 
         fillList("");
     }
-    private void updateUserInfoAdmin(UserEntity updatedUser){
-        name.setText(updatedUser.getLastName() +" "+ updatedUser.getFirstName() + " " + updatedUser.getMiddleName());
+    protected void updateUserInfoAdmin(UserEntity updatedUser){
+        name.setText(updatedUser.getFirstName() +" "+ updatedUser.getLastName() + " " + updatedUser.getMiddleName());
         email.setText(updatedUser.getEmail());
         phone.setText(updatedUser.getPhoneNumber());
         birthday.setText(updatedUser.getBirthday().toString());
     }
     //поиск по имени
-    private void fillList(String name) {
+    protected void fillList(String name) {
         if (name.isEmpty()) {
             employeeGrid.setItems(this.userRepository.findAll());
         } else {

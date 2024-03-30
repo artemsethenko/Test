@@ -43,16 +43,16 @@ public class UserView extends VerticalLayout {
 
     @Autowired
 
-    public UserView(UserRepository userRepository, PersonRepository personRepository, UserEditor userEditor, AuthenticationContext authenticationContext) {
+    public UserView(UserRepository userRepository, PersonRepository personRepository, AuthenticationContext authenticationContext) {
         this.userRepository = userRepository;
-
+        UserEditor userEditor =new UserEditor(userRepository);
         //Получаю доступ к текушего пользователя
         UserDetails userDetails = authenticationContext.getAuthenticatedUser(UserDetails.class).get();
         String username = userDetails.getUsername();
         UserEntity user = personRepository.findByLogin(username).getUserEntity();
 
         //Создаем поля с информацией о пользователе
-        userInfo = new UserInfo(user,userEditor);
+        userInfo = new UserInfo(user, userRepository);
 
         //Место под фото
 
@@ -69,14 +69,17 @@ public class UserView extends VerticalLayout {
 
       //  Добавляем все на страницу
         add(new HorizontalLayout(forImage,userInfo),upload);
-
+        userInfo.setChangeHandler(() ->{
+            UserEntity updatedUser = userEditor.getBinder().getBean();
+            userInfo.updateUserInfo(updatedUser);});
         userEditor.setChangeHandler(() -> {
             userEditor.setVisible(false);
             // Получить обновленные данные пользователя из userEditor
-            UserEntity updatedUser = userEditor.getBinder().getBean();  // Используем binder для получения обновленного объекта
+           // UserEntity updatedUser = userEditor.getBinder().getBean();  // Используем binder для получения обновленного объекта
 
             // Обновить поля UserInfo с данными updatedUser
-            userInfo.updateUserInfo(updatedUser);
+           // userInfo.updateUserInfo(updatedUser);
+
         });
 
 

@@ -10,6 +10,7 @@ import com.vaadin.flow.component.Composite;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
@@ -41,15 +42,15 @@ public class RegistrationView extends Composite {
             Button logInButton = new Button("Log in");
         logInButton.addClickListener(e -> UI.getCurrent().getPage().setLocation("/login"));
             return new VerticalLayout(
-                    new H2("Register"),
+                    new H2("Регистрация"),
                     username,
                     password1,
                     password2,
-                    new Button("Send", event -> register(
+                    new HorizontalLayout(new Button("Send", event -> register(
                             username.getValue(),
                             password1.getValue(),
                             password2.getValue()
-                    )),logInButton
+                    )),logInButton)
 
             );
         }

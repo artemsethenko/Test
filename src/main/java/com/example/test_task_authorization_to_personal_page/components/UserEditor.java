@@ -15,11 +15,13 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.spring.annotation.SpringComponent;
 import com.vaadin.flow.spring.annotation.UIScope;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 @SpringComponent
 @UIScope
+@Data
 public class UserEditor extends VerticalLayout implements KeyNotifier {
     private  final UserRepository userRepository;
     private UserEntity userEntity;
