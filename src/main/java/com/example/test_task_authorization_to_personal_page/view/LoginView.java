@@ -15,11 +15,13 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.internal.RouteUtil;
 import com.vaadin.flow.server.VaadinService;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
+import lombok.Getter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.time.LocalDate;
 @AnonymousAllowed//Любой пользователь может посетить на эту страницу
 @PageTitle("Login")//название страницы
 @Route(value = "login")//адрес страницы
+@Getter
 public class LoginView extends LoginOverlay implements BeforeEnterObserver {
 
     private final SecurityService securityService;

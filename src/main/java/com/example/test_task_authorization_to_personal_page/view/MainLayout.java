@@ -49,19 +49,17 @@ import org.vaadin.lineawesome.LineAwesomeIcon;
 public class MainLayout extends AppLayout {
 
     public static class MenuItemInfo extends ListItem {
-
         private final Class<? extends Component> view;
-
         public MenuItemInfo(String menuTitle, Component icon, Class<? extends Component> view) {
             this.view = view;
             RouterLink link = new RouterLink();
-            // Use Lumo classnames for various styling
+            //Устанавливаю внешний вид
             link.addClassNames(Display.FLEX, Gap.XSMALL, Height.MEDIUM, AlignItems.CENTER, Padding.Horizontal.SMALL,
                     TextColor.BODY);
             link.setRoute(view);
 
             Span text = new Span(menuTitle);
-            // Use Lumo classnames for various styling
+            //Устанавливаю внешний вид
             text.addClassNames(FontWeight.MEDIUM, FontSize.MEDIUM, Whitespace.NOWRAP);
 
             if (icon != null) {
@@ -78,15 +76,20 @@ public class MainLayout extends AppLayout {
     }
 
     private final SecurityService authenticatedUser;
-    private final AccessAnnotationChecker accessChecker;
+    private final   AccessAnnotationChecker accessChecker;
 
     public MainLayout(SecurityService authenticatedUser, AccessAnnotationChecker accessChecker) throws IOException {
         this.authenticatedUser = authenticatedUser;
         this.accessChecker = accessChecker;
 
-        addToNavbar(createHeaderContent());
+        try {
+            addToNavbar(createHeaderContent());
+        }catch (Exception e){
+            e.printStackTrace();
+        }
         setDrawerOpened(false);
     }
+
 
     private Component createHeaderContent() throws IOException {
         Header header = new Header();
@@ -121,6 +124,8 @@ public class MainLayout extends AppLayout {
             userMenu.setThemeName("tertiary-inline contrast");
 
             MenuItem userName = userMenu.addItem("");
+
+            //Настраиваю кнопку выхода в правом верхнем углу
             Div div = new Div();
             div.add(avatar);
             div.add(user.getLogin());
@@ -130,7 +135,6 @@ public class MainLayout extends AppLayout {
             div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
             userName.add(div);
             userName.getSubMenu().addItem("Sign out", e ->  authenticatedUser.logout());
-
             layout.add(userMenu);
         } else {
             Anchor loginLink = new Anchor("login", "Sign in");
@@ -139,8 +143,6 @@ public class MainLayout extends AppLayout {
 
         Nav nav = new Nav();
         nav.addClassNames(Display.FLEX, Overflow.AUTO, Padding.Horizontal.MEDIUM, Padding.Vertical.XSMALL);
-
-        // Wrap the links in a list; improves accessibility
         UnorderedList list = new UnorderedList();
         list.addClassNames(Display.FLEX, Gap.SMALL, ListStyleType.NONE, Margin.NONE, Padding.NONE);
         nav.add(list);
@@ -153,7 +155,7 @@ public class MainLayout extends AppLayout {
         header.add(layout, nav);
         return header;
     }
-
+//Добавляю связанные страницы
     private MenuItemInfo[] createMenuItems() {
         return new MenuItemInfo[]{
                 new MenuItemInfo("Person", LineAwesomeIcon.USER.create(), UserView.class),

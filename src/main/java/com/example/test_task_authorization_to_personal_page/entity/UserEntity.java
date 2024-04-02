@@ -10,9 +10,8 @@ import java.time.LocalDate;
 @Table(name = "users")
 @Data
 public class UserEntity {
-    public UserEntity() {
-
-    }
+    //Личные данные пользователя
+    public UserEntity() {}
 
     public UserEntity(String lastName, String firstName, String middleName, LocalDate birthday, String email, String phoneNumber) {
 

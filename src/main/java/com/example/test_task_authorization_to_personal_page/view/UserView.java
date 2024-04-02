@@ -19,6 +19,7 @@ import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteAlias;
 import com.vaadin.flow.spring.security.AuthenticationContext;
 import jakarta.annotation.security.PermitAll;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -34,76 +35,71 @@ import java.util.Optional;
 @RouteAlias(value = "", layout = MainLayout.class)
 @PermitAll
 @Uses(Icon.class)
-
-
+@Getter
 public class UserView extends VerticalLayout {
     private final UserRepository userRepository;
-    private final UserInfo userInfo ;
-    private  UserEntity user;
-
-    private final  MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
+    private final UserInfo userInfo;
+    private UserEntity user;
+    private Upload upload;
+    private final MultiFileMemoryBuffer buffer = new MultiFileMemoryBuffer();
     private final VerticalLayout forImage = new VerticalLayout();
+    private UserEditor userEditor;
 
     @Autowired
 
     public UserView(UserRepository userRepository, PersonRepository personRepository, AuthenticationContext authenticationContext) {
         this.userRepository = userRepository;
 
-        //Получаю доступ к текушего пользователя
-
-
+        //Получаю доступ к текушему пользователю
         Optional<UserDetails> optionalUD = authenticationContext.getAuthenticatedUser(UserDetails.class);
-            try {
-                String username = optionalUD.get().getUsername();
-                user = personRepository.findByLogin(username).getUserEntity();
-            }catch (Exception e){
-                authenticationContext.logout();
-                UI.getCurrent().getPage().setLocation("/login");
-            }
-
-
+        try {
+            String username = optionalUD.get().getUsername();
+            user = personRepository.findByLogin(username).getUserEntity();
+        } catch (Exception e) {
+            //перенаправляю если user == null
+            authenticationContext.logout();
+            UI.getCurrent().getPage().setLocation("/login");
+        }
 
         //Создаем поля с информацией о пользователе
         userInfo = new UserInfo(user, userRepository);
-        UserEditor userEditor = userInfo.getUserEditor();
+        userEditor = userInfo.getUserEditor();
 
         //Место под фото
-
         forImage.setHeight("400px");
         forImage.setWidth("350px");
 
-//Проверяю если фото у пользователя и встовляю если есть
+        //Проверяю если фото у пользователя и встовляю если есть
         updateImage(user);
- //Создание кнопки для загрузки фото и сохранение в базу
-        Upload upload = addEvent(user);
-     //   forImage.add(new VerticalLayout(upload) );
-
-
-
-      //  Добавляем все на страницу
-        add(new HorizontalLayout(forImage,userInfo),upload);
-
+        //Создание кнопки для загрузки фото и сохранение в базу
+        upload = addEvent(user);
+        //  Добавляем все на страницу
+        add(new HorizontalLayout(forImage, userInfo), upload);
+        //Сработает когда будет вызван changeHandler.onChang() в userEditor
         userEditor.setChangeHandler(() -> {
-           //  Получить обновленные данные пользователя из userEditor
-            UserEntity updatedUser = userEditor.getBinder().getBean();  // Используем binder для получения обновленного объекта
-
-           //  Обновить поля UserInfo с данными updatedUser
+            // Используем binder для получения обновленного объекта
+            UserEntity updatedUser = userEditor.getBinder().getBean();
+            //  Обновить поля UserInfo с данными updatedUser
             userInfo.updateUserInfo(updatedUser);
-
+            updateImage(updatedUser);
         });
-
-
     }
+
     //Логика сохранения картинки
-    public Upload addEvent (UserEntity user){
+    public Upload addEvent(UserEntity user) {
         Upload upload = new Upload(buffer);
         upload.addSucceededListener(event -> {
             String fileName = event.getFileName();
             InputStream inputStream = buffer.getInputStream(fileName);
             try {
                 BufferedImage image = ImageIO.read(inputStream);
-                ImageIO.write(image,"jpg",new File("src/main/webapp/images/"+ fileName));
-                user.setPhotoUrl("images/"+ fileName);
+                ImageIO.write(image, "jpg", new File("src/main/webapp/images/" + user.getId()+ fileName ));
+                //удаляем фото если оно есть
+                if (user.getPhotoUrl() != null){
+                     new File(user.getPhotoUrl()).delete();
+                }
+                //сохраняем новое
+                user.setPhotoUrl("images/" + user.getId() + fileName);
                 userRepository.save(user);
                 updateImage(user);
             } catch (IOException e) {
@@ -113,11 +109,15 @@ public class UserView extends VerticalLayout {
         return upload;
     }
     public void updateImage(UserEntity user) {
-        if(user.getPhotoUrl()!=null) {
+        userInfo.getEditButton().click();
+        userInfo.getEditButton().click();
+        if (user.getPhotoUrl() != null) {
             Image image1 = new Image(user.getPhotoUrl(), "An example");
             image1.setWidth("300px");
             forImage.removeAll();
             forImage.add(image1);
+        }else {
+            forImage.removeAll();
         }
     }
 }

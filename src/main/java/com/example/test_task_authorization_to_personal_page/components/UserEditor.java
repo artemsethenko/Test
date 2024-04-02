@@ -19,6 +19,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.File;
+
 @SpringComponent
 @UIScope
 @Getter
@@ -35,7 +37,9 @@ public class UserEditor extends VerticalLayout implements KeyNotifier {
     private final Button save = new Button("Save", VaadinIcon.CHECK.create());
     private final Button cancel = new Button("Cancel");
     private final Button delete = new Button("Delete", VaadinIcon.TRASH.create());
-    private final HorizontalLayout actions = new HorizontalLayout(save, cancel, delete);
+    private final Button deletePhoto = new Button("Delete Photo", VaadinIcon.TRASH.create());
+
+    private final HorizontalLayout actions = new HorizontalLayout(save, cancel, delete , deletePhoto);
     @Getter
     private final Binder<UserEntity> binder = new Binder<>(UserEntity.class);
     @Setter
@@ -68,10 +72,11 @@ public class UserEditor extends VerticalLayout implements KeyNotifier {
         // wire action buttons to save, delete and reset
         save.addClickListener(e -> save());
         delete.addClickListener(e -> delete());
+        deletePhoto.addClickListener(e -> deletePhoto());
         cancel.addClickListener(e -> editUser(userEntity));
         cancel.addClickListener(e -> setVisible(false));
         setVisible(false);
-        //editUser(null);
+
     }
 
     public void editUser(UserEntity newUserEntity) {
@@ -88,6 +93,17 @@ public class UserEditor extends VerticalLayout implements KeyNotifier {
         setVisible(true);
         firstName.focus();
     }
+    private void deletePhoto() {
+        if (userEntity.getPhotoUrl() == null) {
+
+        } else {
+            new File(userEntity.getPhotoUrl()).delete();
+            userEntity.setPhotoUrl(null);
+            userRepository.save(userEntity);
+            changeHandler.onChang();
+        }
+    }
+
 
     private void delete() {
         userRepository.delete(userEntity);

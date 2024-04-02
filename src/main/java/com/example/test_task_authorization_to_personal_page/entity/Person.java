@@ -8,6 +8,14 @@ import java.util.Objects;
 @Data
 @Table(name = "person")
 public class Person {
+    public Person() {}
+    public Person(String login, String password, Role roles, UserEntity userEntity) {
+        this.login = login;
+        this.password = password;
+        this.roles = roles;
+        this.userEntity = userEntity;
+    }
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -23,6 +31,8 @@ public class Person {
     @JoinColumn(name = "user_id")
     @OneToOne(cascade = CascadeType.ALL)
     private UserEntity userEntity;
+
+
 
     @Override
     public boolean equals(Object o) {
@@ -41,15 +51,6 @@ public class Person {
         return login + " " + roles;
     }
 
-    public Person() {
 
-    }
-
-    public Person(String login, String password, Role roles, UserEntity userEntity) {
-        this.login = login;
-        this.password = password;
-        this.roles = roles;
-        this.userEntity = userEntity;
-    }
 }
 

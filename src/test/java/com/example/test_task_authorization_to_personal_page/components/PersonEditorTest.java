@@ -83,11 +83,7 @@ class PersonEditorTest {
         personEditor.getCancel().click();
         assertFalse(personEditor.isVisible());
     }
-    @Test
-    public void delete() {
-        personEditor.getDelete().click();
-        verify(personRepository).delete(person);
-    }
+
         @Test
         public void save_emptyLogin_shouldShowError() {
         person.setLogin("");

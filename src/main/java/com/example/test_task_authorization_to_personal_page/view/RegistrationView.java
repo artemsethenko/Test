@@ -17,62 +17,58 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.auth.AnonymousAllowed;
 import com.vaadin.flow.component.html.H2;
+
 import java.time.LocalDate;
 
 @Route("/registration")
 @AnonymousAllowed
 public class RegistrationView extends Composite {
-
-
-        private final PersonRepository personRepository;
-
-
+    private final PersonRepository personRepository;
 
     public RegistrationView(PersonRepository personRepository) {
         this.personRepository = personRepository;
 
     }
 
-
     @Override
-        protected Component initContent() {
-            TextField username = new TextField("Username");
-            PasswordField password1 = new PasswordField("Password");
-            PasswordField password2 = new PasswordField("Confirm password");
-            Button logInButton = new Button("Log in");
+    protected Component initContent() {
+        TextField username = new TextField("Username");
+        PasswordField password1 = new PasswordField("Password");
+        PasswordField password2 = new PasswordField("Confirm password");
+        //кнопка перехода на страницу для входа
+        Button logInButton = new Button("Войти");
         logInButton.addClickListener(e -> UI.getCurrent().getPage().setLocation("/login"));
-            return new VerticalLayout(
-                    new H2("Регистрация"),
-                    username,
-                    password1,
-                    password2,
-                    new HorizontalLayout(new Button("Send", event -> register(
-                            username.getValue(),
-                            password1.getValue(),
-                            password2.getValue()
-                    )),logInButton)
+        //кнопка для отправки данных на регистрацию
+        Button sendButton = new Button("Зарегистрироваться");
+        sendButton.addClickListener(e -> register(username.getValue(),password1.getValue(),password2.getValue()));
 
-            );
-        }
+        //Собираем все на странице
+        return new VerticalLayout(
+                new H2("Регистрация"),username,password1,password2,
+                new HorizontalLayout(sendButton,logInButton)
+        );
+    }
+    //Поведение при разных сценариях заполнения
+    private void register(String username, String password1, String password2) {
+        if (username.trim().isEmpty()) {
+            Notification.show("Введите имя");
+        } else if (password1.isEmpty()) {
+            Notification.show("Введите пароль");
+        } else if (!password1.equals(password2)) {
+            Notification.show("Пороли не совпадают");
+        } else {
+            //кодирую пароль
+            String pass = new SecurityConfig().passwordEncoder().encode(password1);
+            //сохраняю пользователя
+            personRepository.save(new Person(username,
+                    pass,
+                    Role.USER,
+                    new UserEntity("", "", "",
+                            LocalDate.of(2000, 1, 1),
+                            "", "")));
 
-        private void register(String username, String password1, String password2) {
-            if (username.trim().isEmpty()) {
-                Notification.show("Enter a username");
-            } else if (password1.isEmpty()) {
-                Notification.show("Enter a password");
-            } else if (!password1.equals(password2)) {
-                Notification.show("Passwords don't match");
-            } else {
-
-                String pass = new SecurityConfig().passwordEncoder().encode(password1);
-
-                personRepository.save(new Person(username,
-                        pass,
-                        Role.USER,
-                        new UserEntity("","","", LocalDate.of(2000,1,1),"","")));
-
-                Notification.show("Check your email.");
-            }
+            Notification.show("Вы зарегестрированны");
         }
     }
+}
 

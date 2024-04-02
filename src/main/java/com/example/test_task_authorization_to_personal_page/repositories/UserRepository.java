@@ -6,8 +6,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
-
+//Репозиторий для UserEntity
 public interface UserRepository extends JpaRepository<UserEntity, Long> {
+    // Поиск по имени, фамилии, отчеству
     @Query("from UserEntity u  " +
             "where concat(u.lastName, ' ' , u.firstName, ' ' , u.middleName)" +
             "like concat ('%', :name, '%') ")

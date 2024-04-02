@@ -25,12 +25,13 @@ public class SecurityService {
     }
 
     @Transactional
+    //Получение информации о person из базы данных для проверки пользователей при входе
     public Optional<Person> get() {
         return authenticationContext.getAuthenticatedUser(UserDetails.class)
                 .map(userDetails -> personRepository.findByLogin(userDetails.getUsername()));
     }
 
-
+//выход из системы
     public void logout() {
         UI.getCurrent().getPage().setLocation("/login");
         SecurityContextLogoutHandler logoutHandler = new SecurityContextLogoutHandler();
@@ -39,5 +40,4 @@ public class SecurityService {
                 null);
     }
 }
-//
-//
+

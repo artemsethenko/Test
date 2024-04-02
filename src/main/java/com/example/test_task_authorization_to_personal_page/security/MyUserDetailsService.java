@@ -22,6 +22,7 @@ public class MyUserDetailsService implements UserDetailsService {
     }
     @Override
     @Transactional
+    //Логика как сохранять данные в UserDetails
     public UserDetails loadUserByUsername(String login) throws UsernameNotFoundException {
         Person person = personRepository.findByLogin(login);
         if (person == null) {
